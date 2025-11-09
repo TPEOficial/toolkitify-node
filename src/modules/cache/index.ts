@@ -212,3 +212,22 @@ export class Cache {
 };
 
 export const GlobalCache = new Cache({ ttl: 60000, maxUses: Infinity, storage: "memory" });
+
+/**
+ * Wrap any function and cache its result automatically
+ * @param fn Function to cache
+ * @param ttl Time to live (number in ms or human-readable string, e.g., "30s")
+ */
+export function cacheFunction<T extends (...args: any[]) => any>(
+    fn: T,
+    ttl: number | HumanTimeString = "30s"
+) {
+    return (...args: Parameters<T>): ReturnType<T> => {
+        const key = `${fn.name}:${JSON.stringify(args)}`;
+        const cached = GlobalCache.get<ReturnType<T>>(key);
+        if (cached !== null) return cached;
+        const result = fn(...args);
+        GlobalCache.set(key, result, { ttl });
+        return result;
+    };
+};

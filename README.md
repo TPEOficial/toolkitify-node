@@ -29,7 +29,7 @@
   <summary><strong>Cache (`cache`)</strong></summary>
 
 ```ts
-import { Cache, GlobalCache } from "toolkitify";
+import { Cache, cacheFunction, GlobalCache } from "toolkitify";
 
 // Create a cache instance.
 const cache = new Cache({ ttl: "30s", maxUses: 3, storage: "memory", logs: "usage" });
@@ -49,6 +49,19 @@ console.log(cache.getAll());
 // Using the singleton GlobalCache.
 GlobalCache.set("singletonKey", 123);
 console.log(GlobalCache.get("singletonKey")); // 123.
+
+// Caching a function.
+
+function expensiveCalculation(x: number) {
+  console.log("Calculating...");
+  return x * 2;
+};
+
+// Auto-cache result for 30 seconds.
+const cachedCalc = cacheFunction(expensiveCalculation, "30s");
+
+console.log(cachedCalc(5)); // "Calculating..." and returns 10.
+console.log(cachedCalc(5)); // Returns 10 without recalculating.
 ```
 
 </details>
