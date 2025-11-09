@@ -1,6 +1,6 @@
 {
   "name": "toolkitify",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "Toolkit to make your life easier",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -21,6 +21,11 @@
       "require": "./dist/cjs/modules/client-only/index.cjs",
       "import": "./dist/esm/modules/client-only/index.js",
       "types": "./dist/types/modules/client-only/index.d.ts"
+    },
+    "./rate-limit": {
+      "require": "./dist/cjs/modules/rate-limit/index.cjs",
+      "import": "./dist/esm/modules/rate-limit/index.js",
+      "types": "./dist/types/modules/rate-limit/index.d.ts"
     },
     "./server-only": {
       "require": "./dist/cjs/modules/server-only/index.cjs",

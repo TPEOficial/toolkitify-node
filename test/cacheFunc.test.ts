@@ -14,7 +14,9 @@ describe("cacheFunction", () => {
             return x * 2;
         };
 
-        const cachedFn = cacheFunction(fn, "50ms");
+        const cachedFn = cacheFunction(fn, {
+            ttl: "50ms"
+        });
 
         expect(cachedFn(5)).toBe(10);
         expect(runCount).toBe(1);
@@ -33,7 +35,9 @@ describe("cacheFunction", () => {
             return x * 2;
         };
 
-        const cachedFn = cacheFunction(fn, "30ms");
+        const cachedFn = cacheFunction(fn, {
+            ttl: "30ms"
+        });
 
         expect(cachedFn(4)).toBe(8);
         expect(runCount).toBe(1);
@@ -54,7 +58,9 @@ describe("cacheFunction", () => {
             return a + b;
         };
 
-        const cachedFn = cacheFunction(fn, "100ms");
+        const cachedFn = cacheFunction(fn, {
+            ttl: "100ms"
+        });
 
         expect(cachedFn(1, 2)).toBe(3);
         expect(runCount).toBe(1);

@@ -20,7 +20,7 @@
 | ------------------------------------- | -------------------------------------------------------------------------- | -------------- |
 | Cache (`cache`)                       | Advanced caching system for functions                                      | 🟢 Active      |
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
-| Rate Limiting (`rate-limiting`)       | Advanced Rate Limit System                                                 | 🔴 Not started |
+| Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🟢 Active      |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
 
 ## Modules Usage Examples
@@ -58,7 +58,7 @@ function expensiveCalculation(x: number) {
 };
 
 // Auto-cache result for 30 seconds.
-const cachedCalc = cacheFunction(expensiveCalculation, "30s");
+const cachedCalc = cacheFunction(expensiveCalculation, { ttl: "30s" });
 
 console.log(cachedCalc(5)); // "Calculating..." and returns 10.
 console.log(cachedCalc(5)); // Returns 10 without recalculating.
@@ -73,16 +73,40 @@ console.log(cachedCalc(5)); // Returns 10 without recalculating.
 import "toolkitify/client-only";
 
 // Run code only on the client/browser.
-clientOnly(() => {
-    console.log("This code runs only in the browser, not in Node/SSR");
-});
+console.log("This code runs only in the browser, not in Node/SSR");
 
 // Wrap a block.
-clientOnly(() => {
-    document.body.style.backgroundColor = "red";
-});
+document.body.style.backgroundColor = "red";
 ```
 
+</details>
+
+<details> 
+  <summary><strong>Rate Limit (`rate-limit`)</strong></summary>
+
+```ts
+import { createRateLimit } from "toolkitify/rate-limit";
+
+// Create a rate limiter for IP addresses: max 5 requests per 10 seconds.
+const ratelimitIp = createRateLimit(5, "10s", "ip");
+
+async function handleRequest(ip: string) {
+    const { success, limit, remaining, reset } = await ratelimitIp.limit(ip);
+
+    if (!success) {
+        console.log(`Rate limit exceeded. Try again after ${new Date(reset).toLocaleTimeString()}`);
+        return;
+    }
+
+    console.log(`Request allowed. Remaining: ${remaining}/${limit}`);
+    // Proceed with your request logic here
+}
+
+// Example usage
+handleRequest("192.168.0.1");
+handleRequest("192.168.0.1");
+handleRequest("192.168.0.1");
+```
 </details>
 
 <details>
@@ -96,7 +120,7 @@ console.log("This code runs only in Node/SSR, not in the browser");
 
 // Access filesystem.
 const fs = require("fs");
-    console.log(fs.readdirSync("."));
+console.log(fs.readdirSync("."));
 ```
 
 </details>

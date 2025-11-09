@@ -72,15 +72,21 @@ export class Cache {
         document.cookie = `${key}=; Max-Age=0; path=/`;
     };
 
+    private getStorageKey(key: string) {
+        return `toolkitify:${key}`;
+    };
+
     private getItemFromStorage<T>(key: string, storage: StorageType): CacheItem<T> | null {
+        const storageKey = this.getStorageKey(key);
+
         if (storage === "memory") return this.memoryStore[key] || null;
         if (!this.isClient()) return null;
 
         let data: string | null = null;
 
-        if (storage === "localStorage") data = localStorage.getItem(key);
-        if (storage === "sessionStorage") data = sessionStorage.getItem(key);
-        if (storage === "cookies") data = this.cookieGet(key);
+        if (storage === "localStorage") data = localStorage.getItem(storageKey);
+        if (storage === "sessionStorage") data = sessionStorage.getItem(storageKey);
+        if (storage === "cookies") data = this.cookieGet(storageKey);
 
         if (!data) return null;
 
@@ -94,20 +100,23 @@ export class Cache {
         }
         if (!this.isClient()) return;
 
+        const storageKey = this.getStorageKey(key);
         const serialized = this.serialize(item);
 
-        if (storage === "localStorage") localStorage.setItem(key, serialized);
-        if (storage === "sessionStorage") sessionStorage.setItem(key, serialized);
-        if (storage === "cookies") this.cookieSet(key, serialized, item.ttl);
+        if (storage === "localStorage") localStorage.setItem(storageKey, serialized);
+        if (storage === "sessionStorage") sessionStorage.setItem(storageKey, serialized);
+        if (storage === "cookies") this.cookieSet(storageKey, serialized, item.ttl);
     };
 
     private removeItemFromStorage(key: string, storage: StorageType) {
+        const storageKey = this.getStorageKey(key);
+
         if (storage === "memory") delete this.memoryStore[key];
         if (!this.isClient()) return;
 
-        if (storage === "localStorage") localStorage.removeItem(key);
-        if (storage === "sessionStorage") sessionStorage.removeItem(key);
-        if (storage === "cookies") this.cookieRemove(key);
+        if (storage === "localStorage") localStorage.removeItem(storageKey);
+        if (storage === "sessionStorage") sessionStorage.removeItem(storageKey);
+        if (storage === "cookies") this.cookieRemove(storageKey);
     };
 
     set<T>(key: string, value: T, options?: CacheOptions) {
@@ -213,21 +222,16 @@ export class Cache {
 
 export const GlobalCache = new Cache({ ttl: 60000, maxUses: Infinity, storage: "memory" });
 
-/**
- * Wrap any function and cache its result automatically
- * @param fn Function to cache
- * @param ttl Time to live (number in ms or human-readable string, e.g., "30s")
- */
 export function cacheFunction<T extends (...args: any[]) => any>(
     fn: T,
-    ttl: number | HumanTimeString = "30s"
+    options: CacheOptions = { ttl: "30s" }
 ) {
     return (...args: Parameters<T>): ReturnType<T> => {
         const key = `${fn.name}:${JSON.stringify(args)}`;
-        const cached = GlobalCache.get<ReturnType<T>>(key);
+        const cached = GlobalCache.get<ReturnType<T>>(key, options);
         if (cached !== null) return cached;
         const result = fn(...args);
-        GlobalCache.set(key, result, { ttl });
+        GlobalCache.set(key, result, options);
         return result;
     };
 };
