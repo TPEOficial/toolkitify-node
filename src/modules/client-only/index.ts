@@ -1,0 +1,2 @@
+const isClient = typeof window !== "undefined" && typeof document !== "undefined" && window !== null && document !== null;
+if (!isClient) throw new Error("[Toolkitify] Do not import this file on the server side.");
