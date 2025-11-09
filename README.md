@@ -1,6 +1,6 @@
 <div align="center">
   <h1>Toolkitify for Node.JS</h1>
-  <h3>Official Toolkitify library for Node.JS</h3>
+  <h3>Everything you need for your project</h3>
   <img src="https://img.shields.io/badge/TypeScript-purple?style=for-the-badge&logo=typescript&logoColor=white"/> 
   <a href="https://github.com/TPEOficial"> <img alt="GitHub" src="https://img.shields.io/badge/GitHub-purple?style=for-the-badge&logo=github&logoColor=white"/></a>
   <a href="https://ko-fi.com/fjrg2007"> <img alt="Kofi" src="https://img.shields.io/badge/Ko--fi-purple?style=for-the-badge&logo=ko-fi&logoColor=white"></a>
