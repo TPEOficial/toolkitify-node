@@ -20,7 +20,7 @@
 | ------------------------------------- | -------------------------------------------------------------------------- | -------------- |
 | Cache (`cache`)                       | Advanced caching system for functions                                      | 🟢 Active      |
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
-| Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🔴 Not started |
+| Rate Limiting (`rate-limiting`)       | Advanced Rate Limit System                                                 | 🔴 Not started |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
 
 ## Modules Usage Examples
