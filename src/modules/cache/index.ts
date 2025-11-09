@@ -1,7 +1,10 @@
+import { parseTime } from "../../utils/basics";
+import { HumanTimeString } from "../../types/primitives";
+
 type StorageType = "memory" | "localStorage" | "sessionStorage" | "cookies";
 
 interface CacheOptions {
-    ttl?: number;
+    ttl?: number | HumanTimeString;
     maxUses?: number;
     storage?: StorageType;
     logs?: LogsCache;
@@ -113,7 +116,7 @@ export class Cache {
             value,
             createdAt: Date.now(),
             uses: 0,
-            ttl: config.ttl,
+            ttl: config.ttl ? parseTime(config.ttl) : undefined,
             maxUses: config.maxUses
         };
         const storage = this.getStorage(config.storage);

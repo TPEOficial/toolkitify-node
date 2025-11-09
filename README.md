@@ -22,3 +22,68 @@
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
 | Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🔴 Not started |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
+
+## Modules Usage Examples
+
+<details>
+  <summary><strong>Cache (`cache`)</strong></summary>
+
+```ts
+import { Cache, GlobalCache } from "toolkitify";
+
+// Create a cache instance.
+const cache = new Cache({ ttl: "30s", maxUses: 3, storage: "memory", logs: "usage" });
+
+// Set a value.
+cache.set("myKey", "Hello World!");
+
+// Get a value
+console.log(cache.get("myKey")); // "Hello World!".
+
+// Reset a specific key.
+cache.reset("myKey");
+
+// Get all cache items.
+console.log(cache.getAll());
+
+// Using the singleton GlobalCache.
+GlobalCache.set("singletonKey", 123);
+console.log(GlobalCache.get("singletonKey")); // 123.
+```
+
+</details>
+
+<details>
+  <summary><strong>Client Only (`client-only`)</strong></summary>
+
+```ts
+import "toolkitify/client-only";
+
+// Run code only on the client/browser.
+clientOnly(() => {
+    console.log("This code runs only in the browser, not in Node/SSR");
+});
+
+// Wrap a block.
+clientOnly(() => {
+    document.body.style.backgroundColor = "red";
+});
+```
+
+</details>
+
+<details>
+  <summary><strong>Server Only (`server-only`)</strong></summary>
+
+```ts
+import "toolkitify/server-only";
+
+// Run code only on the server/Node.
+console.log("This code runs only in Node/SSR, not in the browser");
+
+// Access filesystem.
+const fs = require("fs");
+    console.log(fs.readdirSync("."));
+```
+
+</details>

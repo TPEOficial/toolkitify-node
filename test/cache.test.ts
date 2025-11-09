@@ -19,11 +19,32 @@ describe("Cache", () => {
         expect(cache.get("missing")).toBeNull();
     });
 
-    test("respects ttl expiration", async () => {
+    test("respects ttl expiration in ms", async () => {
         cache.set("key2", "value2", { ttl: 50 });
         expect(cache.get("key2")).toBe("value2");
         await new Promise(r => setTimeout(r, 60));
         expect(cache.get("key2")).toBeNull();
+    });
+
+    // ✅ Nuevos tests con tiempo humano
+    test("respects ttl expiration with human-readable string '30s'", async () => {
+        cache.set("human1", "val1", { ttl: "30s" });
+        expect(cache.get("human1")).toBe("val1");
+    });
+
+    test("respects ttl expiration with '1min'", async () => {
+        cache.set("human2", "val2", { ttl: "1min" });
+        expect(cache.get("human2")).toBe("val2");
+    });
+
+    test("respects ttl expiration with '2hours'", async () => {
+        cache.set("human3", "val3", { ttl: "2hours" });
+        expect(cache.get("human3")).toBe("val3");
+    });
+
+    test("respects ttl expiration with '1day'", async () => {
+        cache.set("human4", "val4", { ttl: "1day" });
+        expect(cache.get("human4")).toBe("val4");
     });
 
     test("respects maxUses", () => {
