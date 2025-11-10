@@ -22,6 +22,7 @@ interface CacheItem<T = any> {
 
 export class Cache {
     private memoryStore: Record<string, CacheItem> = {};
+    private listeners: Record<string, ((info: any) => void)[]> = {};
 
     constructor(private defaultOptions: CacheOptions = { ttl: 60000, maxUses: Infinity, storage: "memory" }) { }
 
@@ -119,6 +120,12 @@ export class Cache {
         if (storage === "cookies") this.cookieRemove(storageKey);
     };
 
+    private emit(event: string, info: any) {
+        const handlers = this.listeners[event];
+        if (!handlers) return;
+        handlers.forEach(h => h(info));
+    };
+
     set<T>(key: string, value: T, options?: CacheOptions) {
         const config = { ...this.defaultOptions, ...options };
         const item: CacheItem<T> = {
@@ -130,6 +137,7 @@ export class Cache {
         };
         const storage = this.getStorage(config.storage);
         this.setItemToStorage(key, item, storage);
+        this.emit("set", { key, storage });
     };
 
     get<T>(key: string, options?: CacheOptions): T | null {
@@ -141,40 +149,63 @@ export class Cache {
 
         if (item.ttl && Date.now() - item.createdAt > item.ttl) {
             this.removeItemFromStorage(key, storage);
+            this.emit("expire", { key, storage });
             return null;
         }
 
         item.uses += 1;
-        if (item.maxUses && item.uses >= item.maxUses) this.removeItemFromStorage(key, storage);
+        if (item.maxUses && item.uses >= item.maxUses) {
+            this.removeItemFromStorage(key, storage);
+            this.emit("delete", { key, storage });
+        }
         else this.setItemToStorage(key, item, storage);
 
+        this.emit("get", { key, storage });
         this.logUsage(key);
-
+        
         return item.value;
     };
 
     reset(key: string, storage?: StorageType) {
         const st = this.getStorage(storage);
         this.removeItemFromStorage(key, st);
+        this.emit("delete", { key, storage: st });
     };
 
     clearAll(storage?: StorageType) {
         const st = this.getStorage(storage);
         if (st === "memory") {
+            Object.keys(this.memoryStore).forEach(k => this.emit("delete", { key: k, storage: st }));
             this.memoryStore = {};
+            this.emit("clear", { storage: st });
             return;
         }
         if (!this.isClient()) return;
 
-        if (st === "localStorage") localStorage.clear();
-        if (st === "sessionStorage") sessionStorage.clear();
+        if (st === "localStorage") {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) this.emit("delete", { key, storage: st });
+            }
+            localStorage.clear();
+        }
+        if (st === "sessionStorage") {
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key) this.emit("delete", { key, storage: st });
+            }
+            sessionStorage.clear();
+        }
         if (st === "cookies") {
             document.cookie.split(";").forEach(c => {
                 const eqPos = c.indexOf("=");
                 const key = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
                 this.cookieRemove(key);
+                this.emit("delete", { key, storage: st });
             });
         }
+
+        this.emit("clear", { storage: st });
     };
 
     getAll(storage?: StorageType) {
@@ -217,6 +248,11 @@ export class Cache {
         }
 
         return store;
+    };
+
+    addEventListener(event: string, handler: (info: any) => void) {
+        if (!this.listeners[event]) this.listeners[event] = [];
+        this.listeners[event].push(handler);
     };
 };
 
