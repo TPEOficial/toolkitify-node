@@ -2,6 +2,7 @@ import { parseTime } from "../../utils/basics";
 import { HumanTimeString } from "../../types/primitives";
 
 type StorageType = "memory" | "localStorage" | "sessionStorage" | "cookies";
+type EventType = "set" | "get" | "delete" | "clear" | "expire";
 
 interface CacheOptions {
     ttl?: number | HumanTimeString;
@@ -23,6 +24,7 @@ interface CacheItem<T = any> {
 export class Cache {
     private memoryStore: Record<string, CacheItem> = {};
     private listeners: Record<string, ((info: any) => void)[]> = {};
+    private eventLog: { event: EventType; info: any; timestamp: number; }[] = [];
 
     constructor(private defaultOptions: CacheOptions = { ttl: 60000, maxUses: Infinity, storage: "memory" }) { }
 
@@ -120,10 +122,31 @@ export class Cache {
         if (storage === "cookies") this.cookieRemove(storageKey);
     };
 
-    private emit(event: string, info: any) {
+    private emit(event: EventType, data: { key?: string, storage: StorageType; }) {
+        const { key, storage } = data;
+        let info: any = { storage };
+
+        if (key) {
+            const item = this.getItemFromStorage<any>(key, storage);
+            info.key = key;
+
+            if (item) {
+                const expireTime = item.ttl ? item.createdAt + item.ttl : null;
+                const msRemaining = expireTime ? expireTime - Date.now() : null;
+                info = {
+                    ...info,
+                    value: item.value,
+                    uses: item.uses,
+                    ttl: item.ttl ?? null,
+                    expiresAt: expireTime ? new Date(expireTime).toLocaleString() : null,
+                    msRemaining: msRemaining && msRemaining > 0 ? msRemaining : 0
+                };
+            }
+        }
+
+        this.eventLog.push({ event, info, timestamp: Date.now() });
         const handlers = this.listeners[event];
-        if (!handlers) return;
-        handlers.forEach(h => h(info));
+        if (handlers) handlers.forEach(h => h(info));
     };
 
     set<T>(key: string, value: T, options?: CacheOptions) {
@@ -164,6 +187,19 @@ export class Cache {
         this.logUsage(key);
         
         return item.value;
+    };
+
+    getTTL(key: string, options?: CacheOptions) {
+        const storage = this.getStorage(options?.storage); // Get storage type.
+        const item = this.getItemFromStorage<any>(key, storage); // Get cache item.
+        if (!item || !item.ttl) return null; // Return null if no TTL.
+        const expireTime = item.createdAt + item.ttl; // Calculate expire timestamp.
+        const msRemaining = expireTime - Date.now(); // Remaining ms.
+        if (msRemaining <= 0) return null; // Expired already.
+        return {
+            msRemaining,
+            expiresAt: new Date(expireTime).toLocaleString()
+        };
     };
 
     reset(key: string, storage?: StorageType) {
@@ -250,9 +286,12 @@ export class Cache {
         return store;
     };
 
-    addEventListener(event: string, handler: (info: any) => void) {
+    addEventListener(event: EventType, handler: (info: any) => void) {
         if (!this.listeners[event]) this.listeners[event] = [];
         this.listeners[event].push(handler);
+        // Replay past events for this listener.
+        const past = this.eventLog.filter(e => e.event === event);
+        for (const e of past) handler(e.info);
     };
 };
 
