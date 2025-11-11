@@ -69,13 +69,13 @@ export class Cache {
         const storageKey = this.getStorageKey(key);
         const match = document.cookie.match(new RegExp("(^| )" + storageKey + "=([^;]+)"));
         return match ? decodeURIComponent(match[2]) : null;
-    }
+    };
 
     private cookieRemove(key: string) {
         if (!this.isClient()) return;
         const storageKey = this.getStorageKey(key);
         document.cookie = `${storageKey}=; Max-Age=0; path=/`;
-    }
+    };
 
     private getStorageKey(key: string) {
         return `toolkitify:${key}`;
