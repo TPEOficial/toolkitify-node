@@ -66,14 +66,16 @@ export class Cache {
 
     private cookieGet(key: string) {
         if (!this.isClient()) return null;
-        const match = document.cookie.match(new RegExp("(^| )" + key + "=([^;]+)"));
+        const storageKey = this.getStorageKey(key);
+        const match = document.cookie.match(new RegExp("(^| )" + storageKey + "=([^;]+)"));
         return match ? decodeURIComponent(match[2]) : null;
-    };
+    }
 
     private cookieRemove(key: string) {
         if (!this.isClient()) return;
-        document.cookie = `${key}=; Max-Age=0; path=/`;
-    };
+        const storageKey = this.getStorageKey(key);
+        document.cookie = `${storageKey}=; Max-Age=0; path=/`;
+    }
 
     private getStorageKey(key: string) {
         return `toolkitify:${key}`;
@@ -275,7 +277,8 @@ export class Cache {
             document.cookie.split(";").forEach(c => {
                 const eqPos = c.indexOf("=");
                 const key = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-                const val = this.cookieGet(key);
+                if (!key.startsWith("toolkitify:")) return;
+                const val = this.cookieGet(key.replace("toolkitify:", ""));
                 if (val) {
                     const item = this.deserialize(val);
                     if (item) store[key] = item;
