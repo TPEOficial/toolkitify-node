@@ -26,7 +26,7 @@ export class Cache {
     private listeners: Record<string, ((info: any) => void)[]> = {};
     private eventLog: { event: EventType; info: any; timestamp: number; }[] = [];
 
-    constructor(private defaultOptions: CacheOptions = { ttl: 60000, maxUses: Infinity, storage: "memory" }) { }
+    constructor(private defaultOptions: CacheOptions = { ttl: 60000, maxUses: Infinity, storage: "memory" }) { };
 
     private isClient() {
         return typeof window !== "undefined";
