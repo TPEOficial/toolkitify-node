@@ -20,6 +20,7 @@
 | ------------------------------------- | -------------------------------------------------------------------------- | -------------- |
 | Cache (`cache`)                       | Advanced caching system for functions                                      | 🟢 Active      |
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
+| Optimistic UI (`optimistic-ui`)       | Optimistic UI System                                                       | 🟢 Active      |
 | Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🟢 Active      |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
 
@@ -62,6 +63,60 @@ const cachedCalc = cacheFunction(expensiveCalculation, { ttl: "30s" });
 
 console.log(cachedCalc(5)); // "Calculating..." and returns 10.
 console.log(cachedCalc(5)); // Returns 10 without recalculating.
+```
+
+</details>
+
+<details>
+  <summary><strong>Optimistic UI (`optimistic-ui`)</strong></summary>
+
+```ts
+import { useOptimistic } from "toolkitify/optimistic-ui";
+
+// With an asynchronous function.
+
+let value = 0;
+
+await useOptimistic.promise(
+    async () => {
+        await new Promise((r) => setTimeout(r, 50));
+        value += 2;
+        return value;
+    },
+    {
+        optimisticUpdate: () => {
+            value += 1;
+        },
+        rollback: () => {
+            value = 0;
+        },
+        onSuccess: (result) => {
+            value = result;
+        }
+    }
+);
+
+// With a synchronous function.
+
+let value = 0;
+
+useOptimistic.sync(
+    () => {
+        value += 2;
+        return value;
+    },
+    {
+        optimisticUpdate: () => {
+            value += 1;
+        },
+        rollback: () => {
+            value = 0;
+        },
+        onSuccess: (result) => {
+            value = result;
+        }
+    }
+);
 ```
 
 </details>
