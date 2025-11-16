@@ -9,7 +9,7 @@ describe("Logger", () => {
     beforeEach(() => {
         logger = new Logger({
             level: "DEBUG",
-            frequency: 1
+            asyncFlush: false
         });
         consoleSpy = jest.spyOn(console, "log").mockImplementation(() => { });
     });
@@ -48,7 +48,7 @@ describe("Logger", () => {
     test("should not log messages below current level", () => {
         const warnLogger = new Logger({
             level: "WARN",
-            frequency: 1
+            asyncFlush: false
         });
 
         warnLogger.debug("Debug below level");
@@ -72,7 +72,7 @@ describe("Logger", () => {
 
     // ✅ NEW TEST: maxUses
     test("should respect maxUses per message", () => {
-        const maxLogger = new Logger({ maxUses: 2 });
+        const maxLogger = new Logger({ maxUses: 2, asyncFlush: false });
 
         // default maxUses = 2, frequency = 1
         maxLogger.info("Limited message");
