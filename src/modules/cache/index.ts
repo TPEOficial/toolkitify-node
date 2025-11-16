@@ -192,15 +192,20 @@ export class Cache {
     };
 
     getTTL(key: string, options?: CacheOptions) {
-        const storage = this.getStorage(options?.storage); // Get storage type.
-        const item = this.getItemFromStorage<any>(key, storage); // Get cache item.
-        if (!item || !item.ttl) return null; // Return null if no TTL.
-        const expireTime = item.createdAt + item.ttl; // Calculate expire timestamp.
-        const msRemaining = expireTime - Date.now(); // Remaining ms.
-        if (msRemaining <= 0) return null; // Expired already.
+        const storage = this.getStorage(options?.storage); // Get the storage type.
+        const item = this.getItemFromStorage<any>(key, storage); // Get the cache item.
+        if (!item || !item.ttl) return null; // Return null if the item doesn't exist or has no TTL.
+
+        const expireTime = item.createdAt + item.ttl; // Calculate expiration timestamp.
+        const msRemaining = expireTime - Date.now(); // Calculate remaining milliseconds.
+        if (msRemaining <= 0) return null; // Return null if already expired.
+
+        const usesRemaining = item.maxUses ? Math.max(item.maxUses - item.uses, 0) : Infinity; // Calculate remaining uses.
+
         return {
             msRemaining,
-            expiresAt: new Date(expireTime).toLocaleString()
+            expiresAt: new Date(expireTime).toLocaleString(),
+            usesRemaining
         };
     };
 

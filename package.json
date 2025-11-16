@@ -1,6 +1,6 @@
 {
   "name": "toolkitify",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Toolkit to make your life easier",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -60,10 +60,14 @@
     "url": "https://github.com/TPEOficial/toolkitify-node"
   },
   "keywords": [
+    "cache",
+    "caching",
     "toolkit",
     "toolkitify",
+    "rate-limit",
     "server-only",
-    "client-only"
+    "client-only",
+    "optimistic-ui"
   ],
   "author": "TPEOficial LLC",
   "license": "Apache-2.0",
