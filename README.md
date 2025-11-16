@@ -20,6 +20,7 @@
 | ------------------------------------- | -------------------------------------------------------------------------- | -------------- |
 | Cache (`cache`)                       | Advanced caching system for functions                                      | 🟢 Active      |
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
+| Logger (`logger`)                     | Advanced logging system                                                    | 🟢 Active      |
 | Optimistic UI (`optimistic-ui`)       | Optimistic UI System                                                       | 🟢 Active      |
 | Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🟢 Active      |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
@@ -30,7 +31,7 @@
   <summary><strong>Cache (`cache`)</strong></summary>
 
 ```ts
-import { Cache, cacheFunction, GlobalCache } from "toolkitify";
+import { Cache, cacheFunction, GlobalCache } from "toolkitify/cache";
 
 // Create a cache instance.
 const cache = new Cache({ ttl: "30s", maxUses: 3, storage: "memory", logs: "usage" });
@@ -132,6 +133,46 @@ console.log("This code runs only in the browser, not in Node/SSR");
 
 // Wrap a block.
 document.body.style.backgroundColor = "red";
+```
+
+</details>
+
+<details>
+  <summary><strong>Logger (`logger`)</strong></summary>
+
+```ts
+import { Logger } from "toolkitify/logger";
+
+const logger = new Logger({
+  level: "DEBUG",    // Minimum log level.
+  frequency: 1,      // Default log every 1 message.
+  maxUses: Infinity  // Default unlimited uses.
+});
+
+// Normal logs.
+logger.debug("Debug message");          // Will be shown.
+logger.info("Info message");            // Will be shown.
+
+// Logs with frequency: only log every 3 calls.
+for (let i = 1; i <= 6; i++) {
+  logger.info("Freq message", { frequency: 3 });
+  // Will only be shown on iterations 3 and 6.
+}
+
+// Logs with color.
+logger.warn("Warning in red", { color: "red" });      // Will be shown in red.
+logger.info("Info in green", { color: "green" });    // Will be shown in green.
+
+// Logs with global maxUses.
+const limitedLogger = new Logger({ maxUses: 2 });
+
+limitedLogger.info("Limited message"); // Will log.
+limitedLogger.info("Limited message"); // Will log.
+limitedLogger.info("Limited message"); // Will not log, maxUses reached.
+
+// Logs with maxUses for a specific message.
+limitedLogger.info("Single-use message", { maxUses: 1 }); // Will log.
+limitedLogger.info("Single-use message", { maxUses: 1 }); // Will not log.
 ```
 
 </details>
