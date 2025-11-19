@@ -20,6 +20,7 @@
 | ------------------------------------- | -------------------------------------------------------------------------- | -------------- |
 | Cache (`cache`)                       | Advanced caching system for functions                                      | 🟢 Active      |
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
+| Feature Flags (`feature-flags`)       | Advanced feature flags system                                              | 🟢 Active      |
 | Logger (`logger`)                     | Advanced logging system                                                    | 🟢 Active      |
 | Optimistic UI (`optimistic-ui`)       | Optimistic UI System                                                       | 🟢 Active      |
 | Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🟢 Active      |
@@ -133,6 +134,55 @@ console.log("This code runs only in the browser, not in Node/SSR");
 
 // Wrap a block.
 document.body.style.backgroundColor = "red";
+```
+
+</details>
+
+<details>
+  <summary><strong>Feature Flags (`feature-flags`)</strong></summary>
+
+```ts
+import { flags, FeatureFlags } "toolkitify/feature-flags";
+
+// Load some static and dynamic flags.
+flags.load({
+  NEW_UI: true,                                  // static flag.
+  BETA_FEATURE: false,                           // static disabled.
+  USER_SPECIFIC_FEATURE: (ctx: { userId: number; }) => ctx.userId === 42 // dynamic.
+});
+
+// Access flags statically.
+console.log(flags.isEnabled("NEW_UI"));         // true.
+console.log(flags.isEnabled("BETA_FEATURE"));   // false.
+
+// Access dynamic flag with context.
+console.log(flags.isEnabled("USER_SPECIFIC_FEATURE", { userId: 42 })); // true.
+console.log(flags.isEnabled("USER_SPECIFIC_FEATURE", { userId: 7 }));  // false.
+
+// Update flags dynamically.
+flags.set("BETA_FEATURE", true);
+console.log(flags.isEnabled("BETA_FEATURE"));   // true.
+
+// Get raw value (boolean or function).
+const raw = flags.get("USER_SPECIFIC_FEATURE");
+console.log(typeof raw); // function.
+
+// Create a typed instance for full TS autocomplete.
+type MyFlags = {
+  NEW_UI: boolean;
+  BETA_FEATURE: boolean;
+  USER_SPECIFIC_FEATURE: (ctx: { userId: number; }) => boolean;
+};
+
+const typedFlags = new FeatureFlags<MyFlags, { userId: number; }>();
+typedFlags.load({
+  NEW_UI: true,
+  BETA_FEATURE: false,
+  USER_SPECIFIC_FEATURE: ctx => ctx.userId % 2 === 0
+});
+
+console.log(typedFlags.isEnabled("USER_SPECIFIC_FEATURE", { userId: 2 })); // true.
+console.log(typedFlags.isEnabled("USER_SPECIFIC_FEATURE", { userId: 3 })); // false.
 ```
 
 </details>
