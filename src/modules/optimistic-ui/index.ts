@@ -8,7 +8,7 @@ export const useOptimistic = {
             onLoading,
         }: {
             optimisticUpdate?: () => void;
-            rollback?: () => void;
+            rollback?: (error: unknown) => void;
             onSuccess?: (result: T) => void;
             onLoading?: () => void;
         }
@@ -19,7 +19,7 @@ export const useOptimistic = {
             const result = await fn();
             onSuccess?.(result);
         } catch (error) {
-            rollback?.();
+            rollback?.(error);
             console.error("[Toolkitify] Optimistic action failed:", error);
         }
     },
@@ -31,7 +31,7 @@ export const useOptimistic = {
             onSuccess,
         }: {
             optimisticUpdate?: () => void;
-            rollback?: () => void;
+            rollback?: (error: unknown) => void;
             onSuccess?: (result: T) => void;
         }
     ): void {
@@ -40,7 +40,7 @@ export const useOptimistic = {
             const result = fn();
             onSuccess?.(result);
         } catch (error) {
-            rollback?.();
+            rollback?.(error);
             console.error("[Toolkitify] Optimistic sync action failed:", error);
         }
     }
