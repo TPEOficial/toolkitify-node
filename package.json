@@ -1,6 +1,6 @@
 {
   "name": "toolkitify",
-  "version": "0.0.19",
+  "version": "0.0.22",
   "description": "Toolkit to make your life easier",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -8,44 +8,44 @@
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "require": "./dist/cjs/index.cjs",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/index.js"
     },
     "./cache": {
+      "types": "./dist/types/modules/cache/index.d.ts",
       "require": "./dist/cjs/modules/cache/index.cjs",
-      "import": "./dist/esm/modules/cache/index.js",
-      "types": "./dist/types/modules/cache/index.d.ts"
+      "import": "./dist/esm/modules/cache/index.js"
     },
     "./client-only": {
+      "types": "./dist/types/modules/client-only/index.d.ts",
       "require": "./dist/cjs/modules/client-only/index.cjs",
-      "import": "./dist/esm/modules/client-only/index.js",
-      "types": "./dist/types/modules/client-only/index.d.ts"
+      "import": "./dist/esm/modules/client-only/index.js"
     },
     "./feature-flags": {
+      "types": "./dist/types/modules/feature-flags/index.d.ts",
       "require": "./dist/cjs/modules/feature-flags/index.cjs",
-      "import": "./dist/esm/modules/feature-flags/index.js",
-      "types": "./dist/types/modules/feature-flags/index.d.ts"
+      "import": "./dist/esm/modules/feature-flags/index.js"
     },
     "./logger": {
+      "types": "./dist/types/modules/logger/index.d.ts",
       "require": "./dist/cjs/modules/logger/index.cjs",
-      "import": "./dist/esm/modules/logger/index.js",
-      "types": "./dist/types/modules/logger/index.d.ts"
+      "import": "./dist/esm/modules/logger/index.js"
     },
     "./optimistic-ui": {
+      "types": "./dist/types/modules/optimistic-ui/index.d.ts",
       "require": "./dist/cjs/modules/optimistic-ui/index.cjs",
-      "import": "./dist/esm/modules/optimistic-ui/index.js",
-      "types": "./dist/types/modules/optimistic-ui/index.d.ts"
+      "import": "./dist/esm/modules/optimistic-ui/index.js"
     },
     "./rate-limit": {
+      "types": "./dist/types/modules/rate-limit/index.d.ts",
       "require": "./dist/cjs/modules/rate-limit/index.cjs",
-      "import": "./dist/esm/modules/rate-limit/index.js",
-      "types": "./dist/types/modules/rate-limit/index.d.ts"
+      "import": "./dist/esm/modules/rate-limit/index.js"
     },
     "./server-only": {
+      "types": "./dist/types/modules/server-only/index.d.ts",
       "require": "./dist/cjs/modules/server-only/index.cjs",
-      "import": "./dist/esm/modules/server-only/index.js",
-      "types": "./dist/types/modules/server-only/index.d.ts"
+      "import": "./dist/esm/modules/server-only/index.js"
     },
     "./*": {
       "require": "./dist/cjs/**/*.cjs",
@@ -59,9 +59,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build:cjs": "tsc -p tsconfig.cjs.json && tsc-alias -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json && tsc-alias -p tsconfig.esm.json",
-    "build": "npm run clean && npm run build:cjs && npm run build:esm && node ./scripts/rename.js",
+    "build": "npm run clean && vite build",
     "start": "ts-node src/index.ts",
     "prepublishOnly": "npm run build",
     "test": "jest"
@@ -100,8 +98,9 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.4.4",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.16",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vite": "^6.4.1",
+    "vite-plugin-dts": "^4.5.4"
   },
   "prettier": {
     "tabWidth": 4,
