@@ -6,6 +6,7 @@ type RateLimitStorage = "memory" | "sessionStorage" | "localStorage" | "redis";
 interface RateLimitOptions {
     limit: number;
     interval: number | HumanTimeString;
+    blockDuration?: number | HumanTimeString;
     storage?: RateLimitStorage;
     key?: string;
     logs?: boolean;
@@ -79,6 +80,7 @@ export class RateLimiter {
     public async check(options: RateLimitOptions): Promise<RateLimitResult> {
         const config = { ...this.defaultOptions, ...options };
         const intervalMs = typeof config.interval === "number" ? config.interval : parseTime(config.interval as HumanTimeString);
+        const blockMs = config.blockDuration ? (typeof config.blockDuration === "number" ? config.blockDuration : parseTime(config.blockDuration)) : intervalMs;
         const key = config.key || "default";
         const storage = config.storage || "memory";
 
@@ -108,16 +110,17 @@ export class RateLimiter {
                     currentCount = parsed.count;
                     resetAt = parsed.resetAt;
                 } else {
-                    await config.redisClient.set(`@toolkitify/ratelimit/${key}`, JSON.stringify({ count: 0, resetAt: Date.now() + intervalMs }), "PX", intervalMs);
                     currentCount = 0;
                     resetAt = Date.now() + intervalMs;
+                    await config.redisClient.set(`@toolkitify/ratelimit/${key}`, JSON.stringify({ count: currentCount, resetAt }), "PX", intervalMs);
                 }
                 break;
             }
         }
 
         if (currentCount >= config.limit) {
-            this.log(`Rate limit exceeded for key: ${key}`);
+            this.log(`Rate limit exceeded for key: ${key}.`);
+
             return {
                 success: false,
                 limit: config.limit,
@@ -127,14 +130,23 @@ export class RateLimiter {
         }
 
         currentCount++;
-        switch (storage) {
-            case "memory": this.memoryStore[key].count = currentCount; break;
-            case "sessionStorage":
-            case "localStorage": this.setClientRecord(key, { count: currentCount, resetAt }, storage); break;
-            case "redis": await config.redisClient.set(key, JSON.stringify({ count: currentCount, resetAt }), "PX", intervalMs); break;
+        const remaining = config.limit - currentCount;
+
+        // Si esta llamada alcanza el límite, aplicar blockDuration para el próximo reset
+        if (currentCount >= config.limit) {
+            resetAt = Date.now() + blockMs;
         }
 
-        const remaining = config.limit - currentCount;
+        switch (storage) {
+            case "memory":
+                this.memoryStore[key].count = currentCount;
+                this.memoryStore[key].resetAt = resetAt;
+                break;
+            case "sessionStorage":
+            case "localStorage": this.setClientRecord(key, { count: currentCount, resetAt }, storage); break;
+            case "redis": await config.redisClient.set(`@toolkitify/ratelimit/${key}`, JSON.stringify({ count: currentCount, resetAt }), "PX", resetAt - Date.now()); break;
+        }
+
         return {
             success: true,
             limit: config.limit,
@@ -146,7 +158,7 @@ export class RateLimiter {
 
 export function createRateLimit(
     limit: number,
-    interval: HumanTimeString | number,
+    interval: number | HumanTimeString,
     keyPrefix: string,
     options: Partial<RateLimitOptions> = {}
 ) {
