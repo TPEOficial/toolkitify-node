@@ -107,3 +107,5 @@ export class Logger {
         this.flush();
     };
 };
+
+export const logger = new Logger();
