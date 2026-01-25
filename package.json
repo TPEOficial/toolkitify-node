@@ -1,6 +1,6 @@
 {
   "name": "toolkitify",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "Toolkit to make your life easier",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -47,6 +47,11 @@
       "require": "./dist/cjs/modules/server-only/index.cjs",
       "import": "./dist/esm/modules/server-only/index.js"
     },
+    "./network": {
+      "types": "./dist/types/modules/network/index.d.ts",
+      "require": "./dist/cjs/modules/network/index.cjs",
+      "import": "./dist/esm/modules/network/index.js"
+    },
     "./*": {
       "require": "./dist/cjs/**/*.cjs",
       "import": "./dist/esm/**/*.js"
@@ -75,7 +80,10 @@
     "rate-limit",
     "server-only",
     "client-only",
-    "optimistic-ui"
+    "optimistic-ui",
+    "network",
+    "ip-address",
+    "client-ip"
   ],
   "author": "TPEOficial LLC",
   "license": "Apache-2.0",

@@ -22,6 +22,7 @@
 | Client Only (`client-only`)           | Client-side only code directive                                            | 🟢 Active      |
 | Feature Flags (`feature-flags`)       | Advanced feature flags system                                              | 🟢 Active      |
 | Logger (`logger`)                     | Advanced logging system                                                    | 🟢 Active      |
+| Network (`network`)                   | Secure client IP extraction with proxy support                             | 🟢 Active      |
 | Optimistic UI (`optimistic-ui`)       | Optimistic UI System                                                       | 🟢 Active      |
 | Rate Limit (`rate-limit`)             | Advanced Rate Limit System                                                 | 🟢 Active      |
 | Server Only (`server-only`)           | Server-side only code directive                                            | 🟢 Active      |
@@ -252,6 +253,53 @@ async function handleRequest(ip: string) {
 handleRequest("192.168.0.1");
 handleRequest("192.168.0.1");
 handleRequest("192.168.0.1");
+```
+</details>
+
+<details>
+  <summary><strong>Network (`network`)</strong></summary>
+
+```ts
+import { Network } from "toolkitify/network";
+
+// Create a network instance configured for your proxy.
+const network = new Network({ proxy: "cloudflare" });
+
+// Express/Node.js middleware example.
+app.use((req, res, next) => {
+    // Get full result with metadata.
+    const result = network.getClientIP(req);
+    console.log(result.ip);      // "203.0.113.50"
+    console.log(result.source);  // "header" | "x-forwarded-for" | "direct"
+    console.log(result.header);  // "cf-connecting-ip"
+    console.log(result.trusted); // true (proprietary headers are trusted)
+
+    // Or just get the IP.
+    const ip = network.extractIP(req);
+
+    next();
+});
+
+// Multiple proxy layers (CDN -> Load Balancer).
+const multiProxy = new Network({
+    proxy: ["cloudflare", "aws"],
+    trustedProxies: ["10.0.0.0/8", "172.16.0.0/12"]
+});
+
+// IP validation utilities.
+network.isLocal("127.0.0.1");       // true
+network.isLocal("::1");             // true
+network.isLocal("localhost");       // true
+
+network.isPrivate("192.168.1.1");   // true
+network.isPrivate("10.0.0.5");      // true
+network.isPrivate("8.8.8.8");       // false
+
+network.isInRange("192.168.1.50", "192.168.1.0/24"); // true
+network.normalize("::ffff:192.168.1.1");             // "192.168.1.1"
+
+// Supported proxies: cloudflare, aws, vercel, fastly, akamai,
+// nginx, gcp, azure, fly, render, railway, heroku.
 ```
 </details>
 
