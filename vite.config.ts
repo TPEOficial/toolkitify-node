@@ -7,6 +7,7 @@ const modules = [
     "client-only",
     "feature-flags",
     "logger",
+    "network",
     "optimistic-ui",
     "rate-limit",
     "server-only"

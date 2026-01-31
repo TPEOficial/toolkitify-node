@@ -1,11 +1,23 @@
 {
   "name": "toolkitify",
-  "version": "0.0.27",
+  "version": "0.0.30",
   "description": "Toolkit to make your life easier",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "type": "module",
+  "typesVersions": {
+    "*": {
+      "cache": ["dist/types/modules/cache/index.d.ts"],
+      "client-only": ["dist/types/modules/client-only/index.d.ts"],
+      "feature-flags": ["dist/types/modules/feature-flags/index.d.ts"],
+      "logger": ["dist/types/modules/logger/index.d.ts"],
+      "network": ["dist/types/modules/network/index.d.ts"],
+      "optimistic-ui": ["dist/types/modules/optimistic-ui/index.d.ts"],
+      "rate-limit": ["dist/types/modules/rate-limit/index.d.ts"],
+      "server-only": ["dist/types/modules/server-only/index.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",

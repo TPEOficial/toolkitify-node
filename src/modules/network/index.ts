@@ -230,7 +230,7 @@ function isLocalIP(ip: string): boolean {
 
 /**
  * Extracts the header value from a request object.
- * Compatible with Express, Node.js http, and similar frameworks.
+ * Compatible with Express, Node.js http, Web API Headers, and similar frameworks.
  */
 function getHeader(req: any, name: string): string | undefined {
     const normalized = name.toLowerCase();
@@ -238,11 +238,11 @@ function getHeader(req: any, name: string): string | undefined {
     // Express/Connect style
     if (typeof req.get === "function") return req.get(normalized);
 
-    // Raw Node.js http.IncomingMessage
-    if (req.headers && typeof req.headers === "object") return req.headers[normalized];
-
-    // Web API Request (fetch-style)
+    // Web API Request/Headers (fetch-style) - must check before bracket notation
     if (typeof req.headers?.get === "function") return req.headers.get(normalized) ?? undefined;
+
+    // Raw Node.js http.IncomingMessage (plain object headers)
+    if (req.headers && typeof req.headers === "object") return req.headers[normalized];
 
     return undefined;
 };
